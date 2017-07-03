@@ -6,9 +6,9 @@ class SearchBar extends Component {
   render() {
     return (
       <form>
-        <input type="text" placeholder="Search..." />
+        <input type="text" placeholder="Search..." value={this.props.filterText} />
         <p>
-          <input type="checkbox" />
+          <input type="checkbox" checked={this.props.inStockOnly} />
           {' '}
           Only show products in stock
         </p>
@@ -49,11 +49,15 @@ class ProductTable extends Component {
     var row = [];
     var lastCategory = null;
     this.props.products.forEach(function(product) {
+      if(product.name.indexOf(this.props.filterText) === -1 ||
+        (!product.stoked && this.props.inStockOnly)) {
+          return;
+        }
       if(product.category !== lastCategory) {
         row.push(<ProductCategoryRow category={product.category} key={product.category} />);
       }
       row.push(<ProductRow product={product} key={product.name} />);
-    })
+    });
     return (
       <table>
         <thead>
@@ -72,6 +76,14 @@ class ProductTable extends Component {
 
 
 class App extends Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      filterText: '',
+      inStockOnly: false
+    }
+  }
+  
   render() {
     var PRODUCTS = [
       { category: 'Sporting Goods', price: '$49.99', stocked: true, name: 'Football' },
@@ -83,8 +95,12 @@ class App extends Component {
     ];
     return (
       <div className="App">
-        <SearchBar />
-        <ProductTable products={PRODUCTS}/>
+        <SearchBar filterText={this.state.filterText} inStockOnly={this.state.inStockOnly} />
+        <ProductTable
+          products={PRODUCTS}
+          filterText={this.state.filterText}
+          inStockOnly={this.state.inStockOnly}
+        />
       </div>
     );
   }
